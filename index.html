@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
   <script src="html2canvas.min.js"></script>
+  <script src="qrcode.min.js"></script>
   <style>
     /* ─────────────────────────────────────────
        DETROIT: BECOME HUMAN — UI Design System
@@ -751,15 +752,15 @@
       color: rgba(255,255,255,.35);
       letter-spacing: .15em;
     }
-    .sc-badge {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: .55rem;
-      color: var(--blue);
-      letter-spacing: .12em;
-      border: 1px solid rgba(26,110,255,.4);
-      padding: .15rem .5rem;
-      border-radius: 1px;
+    .sc-qr {
+      width: 64px;
+      height: 64px;
+      background: #fff;
+      border-radius: 4px;
+      padding: 4px;
+      flex-shrink: 0;
     }
+    .sc-qr canvas, .sc-qr img { display: block; width: 56px !important; height: 56px !important; }
     .sc-char-row {
       display: flex;
       align-items: flex-end;
@@ -773,13 +774,7 @@
       flex-shrink: 0;
     }
     .sc-char-info { flex: 1; }
-    .sc-code {
-      font-family: 'Share Tech Mono', monospace;
-      font-size: .6rem;
-      color: rgba(255,255,255,.4);
-      letter-spacing: .2em;
-      margin-bottom: .4rem;
-    }
+    .sc-code { display: none; }
     .sc-name {
       font-size: 2rem;
       font-weight: 700;
@@ -1354,15 +1349,15 @@ function saveResult(code) {
   // 截取 desc 前两句作为卡片摘要
   var shortDesc = p.desc.replace(/。/g, '。\n').split('\n').slice(0,2).join('').replace(/\n/g,'');
 
+  var QR_URL = 'https://rhythmictan.github.io/crazy16/';
+
   document.getElementById('share-card').innerHTML =
     '<div class="sc-header">'+
       '<span class="sc-logo">CyberCorp · 疯格扫描系统 v2.0</span>'+
-      '<span class="sc-badge">'+code+'</span>'+
     '</div>'+
     '<div class="sc-char-row">'+
       '<img src="chars/char_'+numStr+'.png" alt="'+p.name+'" crossorigin="anonymous" />'+
       '<div class="sc-char-info">'+
-        '<div class="sc-code">PERSONA · '+code+'</div>'+
         '<div class="sc-name">'+p.name+'</div>'+
         '<div class="sc-title">'+p.title+'</div>'+
       '</div>'+
@@ -1371,8 +1366,32 @@ function saveResult(code) {
     '<div class="sc-desc">'+shortDesc+'</div>'+
     '<div class="sc-footer">'+
       '<span class="sc-footer-left">疯了么？职场疯格测试</span>'+
-      '<span class="sc-footer-url">rhythmictan.github.io/crazy16</span>'+
+      '<div class="sc-qr" id="sc-qr-box"></div>'+
     '</div>';
+
+  // 生成二维码，并把 canvas 转成 img 确保 html2canvas 能截到
+  if (typeof QRCode !== 'undefined') {
+    var qrBox = document.getElementById('sc-qr-box');
+    new QRCode(qrBox, {
+      text: QR_URL,
+      width: 56,
+      height: 56,
+      colorDark: '#0A0E1A',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+    // QRCode.js 生成后把 canvas 转为 img
+    setTimeout(function() {
+      var qrCanvas = qrBox.querySelector('canvas');
+      if (qrCanvas) {
+        var qrImg = document.createElement('img');
+        qrImg.src = qrCanvas.toDataURL('image/png');
+        qrImg.style.cssText = 'display:block;width:56px;height:56px;';
+        qrBox.innerHTML = '';
+        qrBox.appendChild(qrImg);
+      }
+    }, 80);
+  }
 
   // 显示遮罩，提示生成中
   var overlay = document.getElementById('save-overlay');
@@ -1382,25 +1401,37 @@ function saveResult(code) {
   msg.textContent = 'GENERATING RESULT CARD...';
   overlay.classList.add('show');
 
-  // 等字体/图片加载后截图
+  // 等字体/图片/二维码加载后截图（200ms 确保二维码 canvas→img 转换完成）
   setTimeout(function(){
     var card = document.getElementById('share-card');
-    html2canvas(card, {
-      backgroundColor: '#0A0E1A',
-      scale: 2,
-      useCORS: true,
-      allowTaint: false,
-      logging: false
-    }).then(function(canvas){
-      _shareImgDataUrl = canvas.toDataURL('image/png');
-      var img = document.createElement('img');
-      img.src = _shareImgDataUrl;
-      wrap.innerHTML = '';
-      wrap.appendChild(img);
-      msg.textContent = '长按图片或点击「保存图片」';
-    }).catch(function(){
-      msg.textContent = '生成失败，请截图保存';
-    });
+
+    function doCapture() {
+      html2canvas(card, {
+        backgroundColor: '#0A0E1A',
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        logging: false
+      }).then(function(canvas){
+        _shareImgDataUrl = canvas.toDataURL('image/png');
+        var img = document.createElement('img');
+        img.src = _shareImgDataUrl;
+        wrap.innerHTML = '';
+        wrap.appendChild(img);
+        msg.textContent = '长按图片或点击「保存图片」';
+      }).catch(function(){
+        msg.textContent = '生成失败，请截图保存';
+      });
+    }
+
+    // 确保二维码 img 已加载完成
+    var qrImgEl = card.querySelector('.sc-qr img');
+    if (qrImgEl && !qrImgEl.complete) {
+      qrImgEl.onload = doCapture;
+      qrImgEl.onerror = doCapture;
+    } else {
+      doCapture();
+    }
   }, 200);
 }
 
