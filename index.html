@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>你疯了么！职场疯格测试</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <title>疯了么？职场疯格测试</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <script src="html2canvas.min.js"></script>
   <style>
     /* ─────────────────────────────────────────
        DETROIT: BECOME HUMAN — UI Design System
@@ -192,25 +193,25 @@
     .led-spin { animation: ledSpin 3s linear infinite; }
     .led-pulse { animation: ledPulse 2s ease-in-out infinite; }
 
-    .home-eyebrow {
-      font-family: var(--mono);
-      font-size: clamp(1rem, 3vw, 1.4rem);
-      font-weight: 400;
-      color: var(--text2);
-      letter-spacing: .12em;
-      margin-bottom: .4rem;
-    }
-
     .home-title {
       font-family: var(--sans);
-      font-size: clamp(2.2rem, 8vw, 3.8rem);
+      font-size: clamp(2.8rem, 10vw, 5rem);
       font-weight: 700;
-      letter-spacing: -.01em;
-      line-height: 1.1;
+      letter-spacing: -.02em;
+      line-height: 1.05;
       color: var(--text);
-      margin-bottom: .4rem;
+      margin-bottom: .5rem;
     }
-    .home-title span { color: var(--blue); }
+
+    .home-eyebrow {
+      font-family: var(--sans);
+      font-size: clamp(1rem, 3.5vw, 1.5rem);
+      font-weight: 600;
+      color: var(--text2);
+      letter-spacing: .06em;
+      margin-bottom: .5rem;
+    }
+    .home-eyebrow span { color: var(--blue); }
 
     .home-sub {
       font-family: var(--mono);
@@ -673,6 +674,168 @@
     .btn-row .btn-primary { flex: 1; justify-content: center; padding: .85rem 1rem; }
     .btn-row .btn-ghost   { flex: 1; justify-content: center; padding: .85rem 1rem; }
 
+    /* 保存图片遮罩 */
+    #save-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10,14,26,.75);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s;
+    }
+    #save-overlay.show { opacity: 1; pointer-events: all; }
+    #save-overlay-msg {
+      font-family: var(--mono);
+      font-size: .75rem;
+      color: rgba(255,255,255,.7);
+      letter-spacing: .15em;
+      margin-bottom: 1.5rem;
+    }
+    #save-canvas-wrap {
+      position: relative;
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 4px;
+      overflow: hidden;
+      max-width: 90vw;
+    }
+    #save-canvas-wrap img {
+      display: block;
+      max-width: 100%;
+      max-height: 70vh;
+    }
+    .save-overlay-btns {
+      display: flex;
+      gap: .75rem;
+      margin-top: 1.25rem;
+    }
+    .save-overlay-btns button {
+      font-family: var(--sans);
+      font-size: .85rem;
+      font-weight: 600;
+      letter-spacing: .06em;
+      padding: .65rem 1.5rem;
+      border-radius: 2px;
+      cursor: pointer;
+      border: none;
+      text-transform: uppercase;
+    }
+    .btn-save-dl  { background: var(--blue); color: #fff; }
+    .btn-save-cls { background: rgba(255,255,255,.1); color: rgba(255,255,255,.7); }
+
+    /* 分享卡片（离屏渲染用） */
+    #share-card {
+      position: fixed;
+      left: -9999px;
+      top: 0;
+      width: 480px;
+      background: #0A0E1A;
+      padding: 2rem 1.75rem 1.75rem;
+      font-family: 'Rajdhani', 'PingFang SC', sans-serif;
+      color: #fff;
+      border-radius: 8px;
+    }
+    .sc-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+    .sc-logo {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .6rem;
+      color: rgba(255,255,255,.35);
+      letter-spacing: .15em;
+    }
+    .sc-badge {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .55rem;
+      color: var(--blue);
+      letter-spacing: .12em;
+      border: 1px solid rgba(26,110,255,.4);
+      padding: .15rem .5rem;
+      border-radius: 1px;
+    }
+    .sc-char-row {
+      display: flex;
+      align-items: flex-end;
+      gap: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+    .sc-char-row img {
+      width: 110px;
+      height: auto;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+    .sc-char-info { flex: 1; }
+    .sc-code {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .6rem;
+      color: rgba(255,255,255,.4);
+      letter-spacing: .2em;
+      margin-bottom: .4rem;
+    }
+    .sc-name {
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: .25rem;
+    }
+    .sc-title {
+      font-size: .8rem;
+      color: rgba(255,255,255,.5);
+      letter-spacing: .06em;
+    }
+    .sc-traits {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .35rem;
+      margin-bottom: 1.25rem;
+    }
+    .sc-trait {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .6rem;
+      color: rgba(255,255,255,.55);
+      border: 1px solid rgba(255,255,255,.15);
+      padding: .18rem .55rem;
+      border-radius: 1px;
+      letter-spacing: .04em;
+    }
+    .sc-desc {
+      font-size: .82rem;
+      color: rgba(255,255,255,.6);
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .sc-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid rgba(255,255,255,.08);
+      padding-top: .9rem;
+    }
+    .sc-footer-left {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .58rem;
+      color: rgba(255,255,255,.25);
+      letter-spacing: .1em;
+    }
+    .sc-footer-url {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .55rem;
+      color: rgba(26,110,255,.6);
+      letter-spacing: .06em;
+    }
+
     /* Toast */
     #toast {
       position: fixed;
@@ -720,7 +883,7 @@
   <div class="topbar-left">
     <span class="topbar-logo">CyberCorp · HR SYSTEM</span>
     <div class="topbar-sep"></div>
-    <span class="topbar-tag">疯格扫描系统 v2.0</span>
+    <span class="topbar-tag">疯了么？职场疯格测试</span>
   </div>
   <div class="topbar-right">
     <div class="topbar-dot"></div>
@@ -763,8 +926,8 @@
     </svg>
   </div>
 
-  <p class="home-eyebrow fade-up-2">你疯了么！</p>
-  <h1 class="home-title fade-up-2"><span>职场疯格</span>测试</h1>
+  <h1 class="home-title fade-up-2">疯了么？</h1>
+  <p class="home-eyebrow fade-up-2"><span>职场疯格测试</span></p>
   <p class="home-sub fade-up-3">职场发疯人格扫描 · 10 题</p>
 
   <!-- 系统信息面板 -->
@@ -844,143 +1007,156 @@
 
 <div id="toast">已复制到剪贴板</div>
 
+<!-- 保存图片遮罩 -->
+<div id="save-overlay">
+  <p id="save-overlay-msg">GENERATING RESULT CARD...</p>
+  <div id="save-canvas-wrap"></div>
+  <div class="save-overlay-btns">
+    <button class="btn-save-dl" onclick="downloadCard()">保存图片</button>
+    <button class="btn-save-cls" onclick="closeSaveOverlay()">关闭</button>
+  </div>
+</div>
+
+<!-- 离屏分享卡片 -->
+<div id="share-card"></div>
+
 <script>
 // ══════════════════════════════════════════════
 //  数据层
 // ══════════════════════════════════════════════
 var QUESTIONS = [
   {
-    text: "你在公司电梯里偶遇大领导，且只有你们两人，电梯显示还有18层。此时你：",
-    a: { text: "低头猛刷手机，假装有条紧急消息要回，眼神死死盯着楼层数字倒计时", scores: { I: 1 } },
-    b: { text: "挂起职业微笑，大脑狂飙废话文学，硬聊今天的天气或公司楼道装修", scores: { E: 1 } }
+    text: "周一早上9:01，你刚坐下，老板在群里发了一条「大家今天都到了吗？」你的第一反应是：",
+    a: { text: "秒回「到了！」同时把昨晚没写完的日报飞速补上，手速堪比外卖小哥抢单", scores: { E: 1 } },
+    b: { text: "盯着消息看了三秒，决定装作没看见，等别人先回，你跟着回一个「在的」", scores: { I: 1 } }
   },
   {
-    text: "你辛辛苦苦熬了三天的方案，老板看完沉默五秒，说：「还是第一版好，改回去吧。」你内心：",
-    a: { text: "表面微笑点头，内心已将其反复油炸撒上孜然，灵魂深处在无声尖叫", scores: { F: 1 } },
-    b: { text: "面无表情调出文件。感叹人类本质是复读机，拿钱办事，莫得感情", scores: { T: 1 } }
+    text: "你熬了三天三夜做的方案，PPT做了60页，字体统一，配色和谐，连页码都对齐了。老板翻了两页说：「思路不对，推倒重来。」你：",
+    a: { text: "当场微笑点头，内心已经把这60页一张一张撕碎，在精神世界里烧成灰，扬了", scores: { F: 1 } },
+    b: { text: "面无表情打开新文档，心里只有一个念头：这个月工资够不够覆盖我的精神损耗", scores: { T: 1 } }
   },
   {
-    text: "你去厕所摸鱼刷手机，已经坐了20分钟，此时外面传来敲门声。你：",
-    a: { text: "立刻锁屏，清清嗓子，假装刚刚在认真处理生理问题，再坚持两分钟", scores: { I: 1 } },
-    b: { text: "直接喊「有人！」然后若无其事继续刷，敲门的人自己会走的", scores: { E: 1 } }
+    text: "你在厕所蹲坑摸鱼已经22分钟，正刷到一个绝妙的视频，外面突然传来急促的敲门声。你：",
+    a: { text: "立刻锁屏，清嗓子，用一种「我在认真工作」的语气喊：「有人——稍等！」然后再刷两分钟", scores: { I: 1 } },
+    b: { text: "头也不抬喊一声「占着呢！」，对方爱等不等，这条视频我必须看完", scores: { E: 1 } }
   },
   {
-    text: "你无意间瞥到对面同事在上班时间刷抖音，已经刷了至少半小时。你：",
-    a: { text: "内心涌起一股莫名的嫉妒，同时开始反思自己为什么这么努力", scores: { F: 1 } },
-    b: { text: "默默记下这个信息，作为日后谈判筹码，面上毫无波澜", scores: { T: 1 } }
+    text: "对面工位的同事已经刷了40分钟抖音，还时不时发出「哈哈哈」的笑声。你：",
+    a: { text: "内心燃起一股复杂的嫉妒，开始质疑自己的人生选择，为什么我要这么努力", scores: { F: 1 } },
+    b: { text: "默默截了个屏，存进一个叫「有用的东西」的相册，面上毫无波澜，继续干活", scores: { T: 1 } }
   },
   {
-    text: "会议上，一个同事开始用「我觉得做人呢……」起头，发表长达三分钟的人生感悟。你：",
-    a: { text: "表情管理到位，眼神放空，灵魂已经飞到楼下便利店买了杯咖啡", scores: { N: 1 } },
-    b: { text: "开始在本子上画格子，或者默默计算这三分钟折合多少工资", scores: { S: 1 } }
+    text: "会议进行到第47分钟，一位同事突然清了清嗓子，说：「我觉得做人呢，最重要的是……」你：",
+    a: { text: "眼神放空，灵魂已经飞出窗外，在楼下奶茶店点了一杯多糖少冰，正在等号", scores: { N: 1 } },
+    b: { text: "低头在本子上默默计算：这段话大概3分钟，折合工资约8.5元，不如直接给我", scores: { S: 1 } }
   },
   {
-    text: "今天是周五下午5点58分，你正在收拾包准备下班。此时老板走过来说：「这个需求今晚能搞定吗？」你：",
-    a: { text: "「没问题！」嘴上已经答应，手已经把包放回桌上，心已经死了", scores: { E: 1 } },
-    b: { text: "「我看一下。」打开文档，默默评估，内心已经在计算加班费和离职成本", scores: { I: 1 } }
+    text: "周五下午5:57，你已经把包背上了，手放在门把手上。老板从身后叫住你：「这个需求今晚能搞定吗？」你：",
+    a: { text: "「没问题！」嘴已经答应，包已经放回桌上，灵魂已经在去地铁站的路上哭泣", scores: { E: 1 } },
+    b: { text: "转身，深呼吸，用一种「我需要评估一下」的语气说：「我看看」，然后打开文档，开始计算离职成本", scores: { I: 1 } }
   },
   {
-    text: "你有个下周一要交的任务，现在是周四。你的状态是：",
-    a: { text: "已经拆解成子任务，今天完成第一步，不拖到最后是我的强迫症底线", scores: { J: 1 } },
-    b: { text: "周日深夜才是我的效率巅峰。ddl是第一生产力，现在动是浪费灵感", scores: { P: 1 } }
+    text: "下周一要交一个报告，现在是周四下午。你的状态是：",
+    a: { text: "已经列好大纲，今天写第一部分，明天写第二部分，周日检查，绝不拖到最后一秒", scores: { J: 1 } },
+    b: { text: "周日晚上11点才是我的创作巅峰，DDL是宇宙第一生产力，现在动是在浪费灵感", scores: { P: 1 } }
   },
   {
-    text: "同事因为低级失误连累你今晚加班到11点。你内心的OS是：",
-    a: { text: "毁灭吧！为什么我总在为别人的智商买单？这个世界不值得", scores: { T: 1 } },
-    b: { text: "唉，ta最近可能压力很大，或者家里出了什么事，真的挺惨的", scores: { F: 1 } }
+    text: "同事因为一个低级错误，导致你今晚要加班到11点。你内心的OS是：",
+    a: { text: "毁灭吧！为什么我要替别人的智商买单？这个世界不值得，我不值得，大家都不值得", scores: { T: 1 } },
+    b: { text: "唉，ta最近可能压力很大，或者家里有什么事，我理解，但我真的很想哭", scores: { F: 1 } }
   },
   {
-    text: "公司组织团建，活动是「每人分享一个人生感悟」。轮到你了，你：",
-    a: { text: "临时编一个听起来很深刻但其实是废话的感悟，全程面不改色", scores: { N: 1 } },
-    b: { text: "说了一句大实话，然后发现全场陷入了尴尬的沉默", scores: { S: 1 } }
+    text: "公司团建，活动是「每人说一句人生感悟」。轮到你了，全场安静，所有人看着你。你：",
+    a: { text: "临时编了一句听起来很深刻但其实是废话的感悟，全程面不改色，还收获了几个点头", scores: { N: 1 } },
+    b: { text: "说了一句大实话，比如「我觉得上班是在消耗生命」，然后全场陷入了诡异的沉默", scores: { S: 1 } }
   },
   {
-    text: "如果此刻天上掉下500万且不用缴税，你第一件事是：",
-    a: { text: "打开计算器，算这笔钱够自己在老家躺平多少年，然后写辞职信", scores: { J: 1 } },
-    b: { text: "租个直升机把辞职信撒满整栋办公楼，优雅告别这个低维位面", scores: { P: 1 } }
+    text: "如果此刻天上突然掉下500万且免税，你的第一反应是：",
+    a: { text: "打开计算器，算这笔钱在老家能躺平多少年，然后打开备忘录，开始起草辞职信", scores: { J: 1 } },
+    b: { text: "租一架直升机，把辞职信打印成传单，从空中撒满整栋办公楼，优雅告别这个低维位面", scores: { P: 1 } }
   }
 ];
 
 var PERSONAS = {
   ESTJ: { code:"ESTJ", num:1,  name:"梅超疯", title:"夺命催办官", stars:5, emoji:"📋", color:"#E8001C",
     desc:"恭喜你，你是职场生态链顶端的稀有物种，是宇宙熵增定律的天然死敌。你的大脑里住着一个永不关机的项目管理系统，每隔15分钟自动推送一条「进度更新」的催命消息。「等一下」是最残忍的三个字，「差不多」是最模糊的哲学命题，「明天再说」是对人类文明的公然侮辱。你不是在催人，你是在拯救世界。",
-    perform:"发疯时会在工位上突然站起来，用一种「我已经忍了很久了」的眼神扫视全场，然后打开共享文档，把所有人的进度条手动拖回起点，重新排期，并在群里发一条「大家注意一下时间节点」。",
-    tips:"建议每周强制关机一次，体验一下失控的感觉。不然你会把身边所有人都催成你的形状，然后发现没人陪你玩了。",
+    perform:"发疯时会在工位上突然站起来，用一种「我已经忍了很久了」的眼神扫视全场，然后打开共享文档，把所有人的进度条手动拖回起点，重新排期，并在群里发一条「大家注意一下时间节点」，后面跟一个微笑表情，比不跟更可怕。",
+    tips:"建议每周强制关机一次，体验一下失控的感觉。不然你会把身边所有人都催成你的形状，然后发现没人陪你玩了，只剩你一个人在空旷的办公室里催自己。",
     traits:["夺命催办","进度表狂魔","世界太慢我太快"] },
-  ENTJ: { code:"ENTJ", num:2,  name:"乔疯",   title:"大招乱推手", stars:5, emoji:"👊", color:"#FF6D00",
-    desc:"恭喜你，你是职场里最危险的那种人——不是因为你坏，而是因为你太对了。你看谁的方案都像半成品，看谁的执行都像在浪费氧气。你不是在否定别人，你只是在用你的标准衡量这个世界，而这个世界暂时还没进化到你的频道。你的存在本身就是一种无声的压力。",
-    perform:"发疯时会把所有人的PPT打开，一页一页翻，每翻一页叹一口气，最后合上电脑说：「重做吧，我来给你们讲一下方向。」然后讲到凌晨两点，全程精神抖擞，只有听的人快死了。",
-    tips:"下班后去拆快递或者玩乐高，在小范围的破坏和重建里找回掌控感，别把这股劲全用在同事身上。",
-    traits:["降龙十八掌","方案全推倒","自带BGM上班"] },
-  ENFJ: { code:"ENFJ", num:2,  name:"乔疯",   title:"大招乱推手", stars:5, emoji:"👊", color:"#FF6D00",
-    desc:"恭喜你，你是职场里最危险的那种人——不是因为你坏，而是因为你太对了。你看谁的方案都像半成品，看谁的执行都像在浪费氧气。你不是在否定别人，你只是在用你的标准衡量这个世界，而这个世界暂时还没进化到你的频道。你的存在本身就是一种无声的压力。",
-    perform:"发疯时会把所有人的PPT打开，一页一页翻，每翻一页叹一口气，最后合上电脑说：「重做吧，我来给你们讲一下方向。」然后讲到凌晨两点，全程精神抖擞，只有听的人快死了。",
-    tips:"下班后去拆快递或者玩乐高，在小范围的破坏和重建里找回掌控感，别把这股劲全用在同事身上。",
-    traits:["降龙十八掌","方案全推倒","自带BGM上班"] },
+  ENTJ: { code:"ENTJ", num:2,  name:"乔疯",   title:"全场推倒重来", stars:5, emoji:"👊", color:"#FF6D00",
+    desc:"恭喜你，你是职场里最危险的那种人——不是因为你坏，而是因为你太对了。你看谁的方案都像半成品，看谁的执行都像在浪费氧气。你不是在否定别人，你只是在用你的标准衡量这个世界，而这个世界暂时还没进化到你的频道。你的存在本身就是一种无声的压力，同事在你面前发言时会不自觉地先在心里过一遍「这话说出去会不会被当场拆穿」。",
+    perform:"发疯时会把所有人的PPT打开，一页一页翻，每翻一页叹一口气，最后合上电脑说：「重做吧，我来给你们讲一下方向。」然后讲到凌晨两点，全程精神抖擞，只有听的人快死了，而你还在问「还有问题吗」。",
+    tips:"下班后去拆快递或者玩乐高，在小范围的破坏和重建里找回掌控感，别把这股劲全用在同事身上。你的能量是核弹级别的，请对准正确的靶子。",
+    traits:["全场推倒重来","方案全是半成品","自带BGM上班"] },
+  ENFJ: { code:"ENFJ", num:2,  name:"乔疯",   title:"全场推倒重来", stars:5, emoji:"👊", color:"#FF6D00",
+    desc:"恭喜你，你是职场里最危险的那种人——不是因为你坏，而是因为你太对了。你看谁的方案都像半成品，看谁的执行都像在浪费氧气。你不是在否定别人，你只是在用你的标准衡量这个世界，而这个世界暂时还没进化到你的频道。你的存在本身就是一种无声的压力，同事在你面前发言时会不自觉地先在心里过一遍「这话说出去会不会被当场拆穿」。",
+    perform:"发疯时会把所有人的PPT打开，一页一页翻，每翻一页叹一口气，最后合上电脑说：「重做吧，我来给你们讲一下方向。」然后讲到凌晨两点，全程精神抖擞，只有听的人快死了，而你还在问「还有问题吗」。",
+    tips:"下班后去拆快递或者玩乐高，在小范围的破坏和重建里找回掌控感，别把这股劲全用在同事身上。你的能量是核弹级别的，请对准正确的靶子。",
+    traits:["全场推倒重来","方案全是半成品","自带BGM上班"] },
   ISTJ: { code:"ISTJ", num:3,  name:"谢霆疯", title:"冷面关机侠", stars:4, emoji:"🔌", color:"#5C6BC0",
-    desc:"恭喜你，你是职场里最难被击穿的人。你的发疯不是爆炸，是断电。当压力超过临界点，你不会崩溃，不会哭，不会发火——你只是会突然变得非常安静，然后把所有消息设成免打扰，从群聊里隐形，在工位上蒸发。同事以为你在认真工作，其实你已经在精神上离职了。",
-    perform:"发疯时会在某个普通的下午，把手机翻到飞行模式，把电脑锁屏，拿起外套，走出公司，消失整整两个小时，回来后什么都不解释，继续干活，仿佛什么都没发生。",
-    tips:"找个深山老林躲两天，全世界都屏蔽掉，只和自己对话。你不是冷漠，你只是需要定期清空缓存，不然迟早蓝屏。",
+    desc:"恭喜你，你是职场里最难被击穿的人。你的发疯不是爆炸，是断电。当压力超过临界点，你不会崩溃，不会哭，不会发火——你只是会突然变得非常安静，然后把所有消息设成免打扰，从群聊里隐形，在工位上蒸发。同事以为你在认真工作，其实你已经在精神上离职了，连工牌都在精神世界里还回去了。",
+    perform:"发疯时会在某个普通的下午，把手机翻到飞行模式，把电脑锁屏，拿起外套，走出公司，消失整整两个小时，回来后什么都不解释，继续干活，仿佛什么都没发生，而且效率比消失前还高。",
+    tips:"找个深山老林躲两天，全世界都屏蔽掉，只和自己对话。你不是冷漠，你只是需要定期清空缓存，不然迟早蓝屏，而且是那种连报错信息都不显示的蓝屏。",
     traits:["直接拔电源","人间蒸发","已离线勿扰"] },
   INFP: { code:"INFP", num:4,  name:"吴青疯", title:"温柔碎裂派", stars:4, emoji:"🌸", color:"#E91E8C",
-    desc:"恭喜你，你是这个钢铁森林里最不合时宜的一朵花。你的发疯是无声的，没有爆炸，没有眼泪，只有空气里弥漫着一种「灵魂碎掉了但还在微笑」的气味。你把所有的委屈都往肚子里咽，然后在深夜打开备忘录，写下一段没人看的独白，第二天早上删掉，继续上班，循环往复，生生不息。",
-    perform:"发疯时会在开会途中突然走神，灵魂出窍飘到窗外，等回过神来发现自己已经在会议纪要里写了半页和工作毫无关系的东西，比如「人为什么要上班」。",
-    tips:"去公园坐着发呆，或者写一首没人看的烂诗。你的内耗需要一个出口，不然它会把你从里面吃掉，连骨头都不剩。",
+    desc:"恭喜你，你是这个钢铁森林里最不合时宜的一朵花。你的发疯是无声的，没有爆炸，没有眼泪，只有空气里弥漫着一种「灵魂碎掉了但还在微笑」的气味。你把所有的委屈都往肚子里咽，然后在深夜打开备忘录，写下一段没人看的独白，第二天早上删掉，继续上班，循环往复，生生不息，堪称职场里最高效的情绪回收机器。",
+    perform:"发疯时会在开会途中突然走神，灵魂出窍飘到窗外，等回过神来发现自己已经在会议纪要里写了半页和工作毫无关系的东西，比如「人为什么要上班」和「如果我是一只猫就好了」。",
+    tips:"去公园坐着发呆，或者写一首没人看的烂诗。你的内耗需要一个出口，不然它会把你从里面吃掉，连骨头都不剩，只留下一个还在按时打卡的空壳。",
     traits:["无声崩溃","灵魂碎裂","内耗专业户"] },
   ESFP: { code:"ESFP", num:5,  name:"李易疯", title:"轻易爆点者", stars:4, emoji:"💥", color:"#9C27B0",
-    desc:"恭喜你，你是职场里最真实的人。你的燃点低到离谱——外卖少了一双筷子、电脑卡顿了0.5秒、有人在群里@全体成员发了条废话，都能让你在内心引爆一颗小型核弹。你不是脾气差，你只是对这个世界的容忍度已经被消耗殆尽了，而且你的消耗速度比充电速度快三倍。",
-    perform:"发疯时会突然站起来，用一种「我今天就豁出去了」的眼神看着屏幕，然后在工作群里打出一段话，删掉，再打，再删，最后发了个「好的」，然后去厕所待了20分钟。",
-    tips:"随身带包超强薄荷糖，起飞前先给大脑物理降温。或者找个没人的楼梯间，对着墙壁小声骂两句，效果显著，亲测有效。",
+    desc:"恭喜你，你是职场里最真实的人。你的燃点低到离谱——外卖少了一双筷子、电脑卡顿了0.5秒、有人在群里@全体成员发了条废话，都能让你在内心引爆一颗小型核弹。你不是脾气差，你只是对这个世界的容忍度已经被消耗殆尽了，而且你的消耗速度比充电速度快三倍，充电宝都救不了你。",
+    perform:"发疯时会突然站起来，用一种「我今天就豁出去了」的眼神看着屏幕，然后在工作群里打出一段话，删掉，再打，再删，最后发了个「好的」，然后去厕所待了20分钟，出来后眼睛有点红，但表情非常平静。",
+    tips:"随身带包超强薄荷糖，起飞前先给大脑物理降温。或者找个没人的楼梯间，对着墙壁小声骂两句，效果显著，亲测有效，比任何心理疏导都管用。",
     traits:["易燃易爆炸","蘑菇云体质","燃点低到离谱"] },
   ESTP: { code:"ESTP", num:6,  name:"汪疯",   title:"头条发疯体", stars:4, emoji:"📢", color:"#F57C00",
-    desc:"恭喜你，你是职场里最需要观众的人。你的发疯必须要有人看，如果没人看，那这疯白发了，还不如不发。你天生自带舞台感，连崩溃都要崩溃得有声有色，让所有人都知道今天发生了什么，谁对不起谁，事情的来龙去脉，以及你有多委屈。你是职场里的行走话题。",
-    perform:"发疯时会在工位上越说越大声，越说越有观众，最后整个办公区都在侧耳倾听，而你浑然不觉，还在继续，直到有人递来一杯水，你才意识到自己已经表演了二十分钟。",
-    tips:"去KTV包房狂吼三小时，把那股表演欲消耗在麦克风里，别消耗在同事身上。你的能量是宝贵资源。",
+    desc:"恭喜你，你是职场里最需要观众的人。你的发疯必须要有人看，如果没人看，那这疯白发了，还不如不发。你天生自带舞台感，连崩溃都要崩溃得有声有色，让所有人都知道今天发生了什么，谁对不起谁，事情的来龙去脉，以及你有多委屈。你是职场里的行走话题，同事的下班聊天素材有一半来自你。",
+    perform:"发疯时会在工位上越说越大声，越说越有观众，最后整个办公区都在侧耳倾听，而你浑然不觉，还在继续，直到有人递来一杯水，你才意识到自己已经表演了二十分钟，而且还挺好看的。",
+    tips:"去KTV包房狂吼三小时，把那股表演欲消耗在麦克风里，别消耗在同事身上。你的能量是宝贵资源，用对地方，你就是全场最靓的仔。",
     traits:["必须有观众","占领注意力","发疯要上头条"] },
   ISFJ: { code:"ISFJ", num:8,  name:"林疯",   title:"临期发酵型", stars:3, emoji:"🍞", color:"#2E7D32",
-    desc:"恭喜你，你是职场里最温柔的定时炸弹。你平时好说话，好商量，什么都「没关系」，什么都「我来吧」。但你不知道的是，你每次说「没关系」，情绪就在你体内多发酵一分。等到某一天，某一件微不足道的小事——比如有人把你的马克杯放错了位置——会成为压垮你的最后一根稻草，然后你会以一种让所有人都没想到的方式，彻底炸开。",
-    perform:"发疯时会在某次「又一次被拜托做不该做的事」之后，突然沉默，然后用一种非常平静的语气说出一段让全场鸦雀无声的话，说完之后自己也愣了一下。",
-    tips:"练习说「不」。你不是不能拒绝，你只是太久没练习了。及时排气，防止情绪在体内变质，变成一种更危险的东西。",
+    desc:"恭喜你，你是职场里最温柔的定时炸弹。你平时好说话，好商量，什么都「没关系」，什么都「我来吧」。但你不知道的是，你每次说「没关系」，情绪就在你体内多发酵一分。等到某一天，某一件微不足道的小事——比如有人把你的马克杯放错了位置——会成为压垮你的最后一根稻草，然后你会以一种让所有人都没想到的方式，彻底炸开，而且炸得非常精准，每一句话都戳在要害上。",
+    perform:"发疯时会在某次「又一次被拜托做不该做的事」之后，突然沉默，然后用一种非常平静的语气说出一段让全场鸦雀无声的话，说完之后自己也愣了一下，然后若无其事地回到工位，继续帮别人做事。",
+    tips:"练习说「不」。你不是不能拒绝，你只是太久没练习了。及时排气，防止情绪在体内变质，变成一种更危险的东西——比如在最不合适的场合，说出最合适的真话。",
     traits:["老好人面具","内部持续发酵","临期必炸"] },
   ESFJ: { code:"ESFJ", num:9,  name:"欧阳疯", title:"逆向逻辑怪", stars:5, emoji:"🌀", color:"#00796B",
-    desc:"恭喜你，你是职场里最难被反驳的人。不是因为你说得对，而是因为你的逻辑自成体系，外人根本找不到入口。你能把「我迟到是因为我来了」说得理直气壮，能把「这个方案失败是因为执行得太成功了」讲得头头是道，让对方听完之后陷入长达三分钟的哲学沉默，开始怀疑自己的智商。",
-    perform:"发疯时会在会议室里越说越起劲，逻辑越绕越远，最后连自己都不知道在说什么，但语气依然非常坚定，眼神依然非常真诚，全场没有一个人敢打断你。",
-    tips:"去教AI说话，让你的逆向思维去折磨机器，别折磨同事。你的脑回路是宝贵资源，用对地方，能改变世界。",
+    desc:"恭喜你，你是职场里最难被反驳的人。不是因为你说得对，而是因为你的逻辑自成体系，外人根本找不到入口。你能把「我迟到是因为我来了」说得理直气壮，能把「这个方案失败是因为执行得太成功了」讲得头头是道，让对方听完之后陷入长达三分钟的哲学沉默，开始怀疑自己的智商，以及自己是否真的上过学。",
+    perform:"发疯时会在会议室里越说越起劲，逻辑越绕越远，最后连自己都不知道在说什么，但语气依然非常坚定，眼神依然非常真诚，全场没有一个人敢打断你，因为他们都在努力听懂。",
+    tips:"去教AI说话，让你的逆向思维去折磨机器，别折磨同事。你的脑回路是宝贵资源，用对地方，能改变世界，用错地方，能改变同事的精神状态。",
     traits:["倒转经脉","歪理带疯全场","逆向思维过载"] },
   ISFP: { code:"ISFP", num:10, name:"聂疯",   title:"疯血爆发派", stars:5, emoji:"🩸", color:"#C62828",
-    desc:"恭喜你，你是职场里最危险的「安静型」。你平时温润如玉，好说话，不计较，让人觉得你是个好欺负的老实人。但你体内潜伏着一股疯血，平时冬眠，一旦有人动了你的假期、你的底线、或者你那个「这件事我真的不想做」的开关，疯血会在0.3秒内全面觉醒，让所有人都后悔今天来上班。",
-    perform:"发疯时不会大喊大叫，只会用一种非常平静、非常清晰的语气，把对方的每一条理由逐一拆解，然后说：「所以，不行。」然后转身回到工位，继续摸鱼。",
-    tips:"练习泰拳或散打，把那股爆发力留在沙袋上。你的能量需要一个物理出口，不然它会在最不合适的时候喷出来。",
+    desc:"恭喜你，你是职场里最危险的「安静型」。你平时温润如玉，好说话，不计较，让人觉得你是个好欺负的老实人。但你体内潜伏着一股疯血，平时冬眠，一旦有人动了你的假期、你的底线、或者你那个「这件事我真的不想做」的开关，疯血会在0.3秒内全面觉醒，让所有人都后悔今天来上班，以及后悔认识你。",
+    perform:"发疯时不会大喊大叫，只会用一种非常平静、非常清晰的语气，把对方的每一条理由逐一拆解，然后说：「所以，不行。」然后转身回到工位，继续摸鱼，仿佛刚才只是处理了一个小bug。",
+    tips:"练习泰拳或散打，把那股爆发力留在沙袋上。你的能量需要一个物理出口，不然它会在最不合适的时候喷出来，比如在年终述职的时候。",
     traits:["温润如玉表面","疯血潜伏体内","底线触发核爆"] },
-  ENFP: { code:"ENFP", num:11, name:"冯绍疯", title:"少惹我疯",   stars:3, emoji:"🫧", color:"#0097A7",
-    desc:"恭喜你，你是职场里内心戏最丰富的人。你的身体在开会，你的灵魂已经飞出了银河系，正在某个平行宇宙里经营一家咖啡馆，或者在写一本没人看的小说，或者在想如果自己是一只猫会怎样。你不是不认真，你只是认真的方向和这份工作不太一样。",
-    perform:"发疯时会在某个无聊的下午突然冒出一个「绝妙的想法」，然后花两个小时把它规划得非常完整，做了思维导图和时间线，然后发现和手头的工作毫无关系，然后默默关掉文档，假装什么都没发生。",
-    tips:"买个VR眼镜，下班就去异世界冒险。你的想象力是天赋，别让它在周报里烂掉，那是暴殄天物。",
+  ENFP: { code:"ENFP", num:11, name:"冯绍疯", title:"灵魂出逃者",   stars:3, emoji:"🫧", color:"#0097A7",
+    desc:"恭喜你，你是职场里内心戏最丰富的人。你的身体在开会，你的灵魂已经飞出了银河系，正在某个平行宇宙里经营一家猫咖，或者在写一本没人看的小说，或者在认真思考如果自己是一只猫会选择哪个主人。你不是不认真，你只是认真的方向和这份工作不太一样，差了大概一个宇宙的距离。",
+    perform:"发疯时会在某个无聊的下午突然冒出一个「绝妙的想法」，然后花两个小时把它规划得非常完整，做了思维导图、时间线和商业计划书，然后发现和手头的工作毫无关系，然后默默关掉文档，假装什么都没发生，继续写周报。",
+    tips:"买个VR眼镜，下班就去异世界冒险。你的想象力是天赋，别让它在周报里烂掉，那是暴殄天物，是对宇宙创造力的严重浪费。",
     traits:["精神出逃者","灵魂飞出银河","内心戏第一名"] },
   ENTP: { code:"ENTP", num:12, name:"陆小疯", title:"灵犀发疯派", stars:4, emoji:"✌️", color:"#1565C0",
-    desc:"恭喜你，你是职场里最让人摸不透的人。你发疯的方式是调皮的——你享受混乱，甚至有时候会悄悄制造一点混乱，然后再优雅地出手解决，让所有人都搞不清楚你到底是在救火还是在纵火。你不是坏人，你只是觉得太顺了会无聊，而无聊是你最大的敌人。",
-    perform:"发疯时会在最关键的节点提出一个「但是如果反过来想呢」，然后把整个讨论带偏，最后自己又把它拉回来，全程面带微笑，仿佛刚才什么都没发生，只有其他人满脸问号。",
-    tips:"去玩密室逃脱，把你的灵犀一指用在解密上，别用在搅局上。你的智商值得更好的舞台。",
+    desc:"恭喜你，你是职场里最让人摸不透的人。你发疯的方式是调皮的——你享受混乱，甚至有时候会悄悄制造一点混乱，然后再优雅地出手解决，让所有人都搞不清楚你到底是在救火还是在纵火。你不是坏人，你只是觉得太顺了会无聊，而无聊是你最大的敌人，比KPI还可怕。",
+    perform:"发疯时会在最关键的节点提出一个「但是如果反过来想呢」，然后把整个讨论带偏，最后自己又把它拉回来，全程面带微笑，仿佛刚才什么都没发生，只有其他人满脸问号，以及一种莫名其妙被耍了的感觉。",
+    tips:"去玩密室逃脱，把你的灵犀一指用在解密上，别用在搅局上。你的智商值得更好的舞台，而不是把同事搞得集体怀疑人生。",
     traits:["调皮式发疯","救火兼纵火","享受混乱"] },
   ISTP: { code:"ISTP", num:13, name:"流川疯", title:"强制休眠派", stars:3, emoji:"😴", color:"#0277BD",
-    desc:"恭喜你，你是职场里最彻底的极简主义者。你的人生哲学只有一句话：只要我睡得够快，工作的苦就追不上我。你不是懒，你是在用最低的能耗维持最基本的生命体征，把所有多余的感受都屏蔽掉，以一种近乎禅意的方式，在这个嘈杂的职场里活了下来。你是职场里的最强生存者。",
-    perform:"发疯时会在最重要的会议上，用一种「我只是闭目养神」的姿势，进入长达20分钟的深度睡眠，醒来后若无其事地问：「刚才说到哪了？」然后在别人的复述中，精准指出了一个关键问题。",
-    tips:"买个好的颈枕和眼罩，梦里真的没有甲方。你的睡眠是你最后的自由，好好保护它，这是你的核心竞争力。",
+    desc:"恭喜你，你是职场里最彻底的极简主义者。你的人生哲学只有一句话：只要我睡得够快，工作的苦就追不上我。你不是懒，你是在用最低的能耗维持最基本的生命体征，把所有多余的感受都屏蔽掉，以一种近乎禅意的方式，在这个嘈杂的职场里活了下来，而且活得比所有人都滋润。",
+    perform:"发疯时会在最重要的会议上，用一种「我只是闭目养神」的姿势，进入长达20分钟的深度睡眠，醒来后若无其事地问：「刚才说到哪了？」然后在别人的复述中，精准指出了一个关键问题，让所有人都不知道该生气还是该佩服。",
+    tips:"买个好的颈枕和眼罩，梦里真的没有甲方，也没有周报，也没有那个每天发「进展怎么样了」的人。你的睡眠是你最后的自由，好好保护它。",
     traits:["强制秒睡","职场极简主义","梦里没有甲方"] },
   INTP: { code:"INTP", num:14, name:"独孤求疯", title:"高维孤独派", stars:3, emoji:"🗻", color:"#4527A0",
-    desc:"恭喜你，你是职场里最孤独的天才。不是因为没人喜欢你，而是因为你说的话，别人需要反应三秒才能理解，而你已经想到了第七步。你不是在发疯，你是在一个人下一盘没有对手的棋，然后为自己的孤独感到一点点寂寞，然后打开抖音，刷了两个小时，感觉好多了。",
-    perform:"发疯时会在某次讨论中说出一个「其实这个问题的本质是……」，然后讲了十分钟，抬头发现所有人都在看手机，于是沉默，然后继续自己想，把结论写在便利贴上，贴在显示器边上，没人看。",
-    tips:"去菜市场找大妈砍价，在最有烟火气的对抗中找回理智。你需要偶尔降落到地面，不然你会飘走的。",
+    desc:"恭喜你，你是职场里最孤独的天才。不是因为没人喜欢你，而是因为你说的话，别人需要反应三秒才能理解，而你已经想到了第七步。你不是在发疯，你是在一个人下一盘没有对手的棋，然后为自己的孤独感到一点点寂寞，然后打开抖音，刷了两个小时，感觉好多了，然后继续孤独。",
+    perform:"发疯时会在某次讨论中说出一个「其实这个问题的本质是……」，然后讲了十分钟，抬头发现所有人都在看手机，于是沉默，然后继续自己想，把结论写在便利贴上，贴在显示器边上，没人看，但你觉得写出来就够了。",
+    tips:"去菜市场找大妈砍价，在最有烟火气的对抗中找回理智。你需要偶尔降落到地面，不然你会飘走的，飘到一个连WiFi都没有的高维空间。",
     traits:["高维孤独","逻辑深度无人懂","文件山上的隐士"] },
   INTJ: { code:"INTJ", num:15, name:"疯诺依曼", title:"逻辑死机派", stars:4, emoji:"🤖", color:"#6A1B9A",
-    desc:"恭喜你，你是职场里最接近机器的人类。你的大脑是一台高性能处理器，但这台处理器有一个致命弱点：它无法处理「低质量输入」。当同事的逻辑出现漏洞，当方案里有明显的Bug，当有人在会议上说了一句「我感觉应该这样」，你的CPU就会开始过热，然后进入死循环，然后开始在内心默默重写对方的整个人生规划。",
-    perform:"发疯时会在白板上写下一串推导过程，把对方逻辑里的每一个漏洞标出来，然后用一种「我不是在针对你，我是在针对错误」的语气，逐条反驳，直到对方彻底沉默，你才满意地坐下来。",
-    tips:"手动降低智商一小时，看两集脑残剧。你的大脑需要定期清空垃圾文件，不然迟早过热宕机。",
+    desc:"恭喜你，你是职场里最接近机器的人类。你的大脑是一台高性能处理器，但这台处理器有一个致命弱点：它无法处理「低质量输入」。当同事的逻辑出现漏洞，当方案里有明显的Bug，当有人在会议上说了一句「我感觉应该这样」，你的CPU就会开始过热，然后进入死循环，然后开始在内心默默重写对方的整个人生规划，包括职业路径和性格改造方案。",
+    perform:"发疯时会在白板上写下一串推导过程，把对方逻辑里的每一个漏洞标出来，然后用一种「我不是在针对你，我是在针对错误」的语气，逐条反驳，直到对方彻底沉默，你才满意地坐下来，顺手把白板擦干净。",
+    tips:"手动降低智商一小时，看两集脑残剧。你的大脑需要定期清空垃圾文件，不然迟早过热宕机，而且是那种修都修不好的宕机。",
     traits:["CPU过热","同事逻辑全是Bug","无限死循环"] },
   INFJ: { code:"INFJ", num:16, name:"疯清扬", title:"轻盈飞升派", stars:2, emoji:"🧘", color:"#1B5E20",
-    desc:"恭喜你，你是职场里最接近「已经不在了」的人。你不是在发疯，你是在飞升。你早就看破了这一切——KPI是幻觉，晋升是幻觉，那个「再努力一下就会好的」也是幻觉。你现在的状态是：人还在工位上，心已经在某个没有周报的地方喝茶了，顺便在想要不要去大理开个民宿。",
-    perform:"发疯时会在茶水间站着发呆整整五分钟，然后回到工位，打开文档，写下「我想辞职」四个字，然后删掉，然后继续干活，然后又打开文档，又写了一遍，又删掉，如此循环，已经持续了三个月。",
-    tips:"去寺庙住两天，彻底与世隔绝。你不是需要努力，你是需要一次彻底的清空，然后重新决定你到底想要什么。",
+    desc:"恭喜你，你是职场里最接近「已经不在了」的人。你不是在发疯，你是在飞升。你早就看破了这一切——KPI是幻觉，晋升是幻觉，那个「再努力一下就会好的」也是幻觉。你现在的状态是：人还在工位上，心已经在某个没有周报的地方喝茶了，顺便在想要不要去大理开个民宿，或者去西藏找找自己。",
+    perform:"发疯时会在茶水间站着发呆整整五分钟，然后回到工位，打开文档，写下「我想辞职」四个字，然后删掉，然后继续干活，然后又打开文档，又写了一遍，又删掉，如此循环，已经持续了三个月，文档的撤销记录里全是这四个字。",
+    tips:"去寺庙住两天，彻底与世隔绝。你不是需要努力，你是需要一次彻底的清空，然后重新决定你到底想要什么，以及你到底是谁，以及那个民宿要不要真的开。",
     traits:["职场扫地僧","看破红尘","物理飞升中"] }
 };
 
@@ -1059,13 +1235,20 @@ function renderQuestion(idx) {
 
 // ── 选择 ──
 function pick(addScores, btn) {
-  document.querySelectorAll('.opt-btn').forEach(function(b){ b.onclick = null; });
+  // 禁用所有选项，高亮选中项
+  document.querySelectorAll('.opt-btn').forEach(function(b){
+    b.onclick = null;
+    b.classList.remove('chosen');
+  });
   btn.classList.add('chosen');
   Object.keys(addScores).forEach(function(d){ scores[d] = (scores[d]||0) + addScores[d]; });
   setTimeout(function(){
     current++;
-    if (current < QUESTIONS.length) { renderQuestion(current); }
-    else { showResult(); }
+    if (current < QUESTIONS.length) {
+      renderQuestion(current); // renderQuestion 会重建 DOM，自然清除 chosen
+    } else {
+      showResult();
+    }
   }, 320);
 }
 
@@ -1143,12 +1326,94 @@ function buildResult(p, code) {
 
   // 按钮
   html += '<div class="btn-row">' +
-    '<button onclick="copyResult(\''+code+'\',\''+p.name+'\')" class="btn-primary">分享结果</button>' +
-    '<button onclick="restart()" class="btn-ghost">重新测试</button>' +
+    '<button onclick="saveResult(\''+code+'\')" class="btn-primary">保存结果图</button>' +
+    '<button onclick="copyResult(\''+code+'\',\''+p.name+'\')" class="btn-ghost">复制分享文案</button>' +
+  '</div>' +
+  '<div class="btn-row" style="margin-top:.4rem">' +
+    '<button onclick="restart()" class="btn-ghost" style="flex:1;justify-content:center">重新测试</button>' +
   '</div>';
 
   html += '</div>';
   return html;
+}
+
+// ── 生成分享卡片 ──
+var _shareCode = '';
+var _shareImgDataUrl = '';
+
+function saveResult(code) {
+  _shareCode = code;
+  var p = PERSONAS[code] || PERSONAS['INFP'];
+  var numStr = String(p.num).padStart(2,'0');
+
+  // 构建离屏卡片 HTML
+  var traitsHtml = p.traits.map(function(t){
+    return '<span class="sc-trait">'+t+'</span>';
+  }).join('');
+
+  // 截取 desc 前两句作为卡片摘要
+  var shortDesc = p.desc.replace(/。/g, '。\n').split('\n').slice(0,2).join('').replace(/\n/g,'');
+
+  document.getElementById('share-card').innerHTML =
+    '<div class="sc-header">'+
+      '<span class="sc-logo">CyberCorp · 疯格扫描系统 v2.0</span>'+
+      '<span class="sc-badge">'+code+'</span>'+
+    '</div>'+
+    '<div class="sc-char-row">'+
+      '<img src="chars/char_'+numStr+'.png" alt="'+p.name+'" crossorigin="anonymous" />'+
+      '<div class="sc-char-info">'+
+        '<div class="sc-code">PERSONA · '+code+'</div>'+
+        '<div class="sc-name">'+p.name+'</div>'+
+        '<div class="sc-title">'+p.title+'</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="sc-traits">'+traitsHtml+'</div>'+
+    '<div class="sc-desc">'+shortDesc+'</div>'+
+    '<div class="sc-footer">'+
+      '<span class="sc-footer-left">疯了么？职场疯格测试</span>'+
+      '<span class="sc-footer-url">rhythmictan.github.io/crazy16</span>'+
+    '</div>';
+
+  // 显示遮罩，提示生成中
+  var overlay = document.getElementById('save-overlay');
+  var wrap    = document.getElementById('save-canvas-wrap');
+  var msg     = document.getElementById('save-overlay-msg');
+  wrap.innerHTML = '';
+  msg.textContent = 'GENERATING RESULT CARD...';
+  overlay.classList.add('show');
+
+  // 等字体/图片加载后截图
+  setTimeout(function(){
+    var card = document.getElementById('share-card');
+    html2canvas(card, {
+      backgroundColor: '#0A0E1A',
+      scale: 2,
+      useCORS: true,
+      allowTaint: false,
+      logging: false
+    }).then(function(canvas){
+      _shareImgDataUrl = canvas.toDataURL('image/png');
+      var img = document.createElement('img');
+      img.src = _shareImgDataUrl;
+      wrap.innerHTML = '';
+      wrap.appendChild(img);
+      msg.textContent = '长按图片或点击「保存图片」';
+    }).catch(function(){
+      msg.textContent = '生成失败，请截图保存';
+    });
+  }, 200);
+}
+
+function downloadCard() {
+  if (!_shareImgDataUrl) return;
+  var a = document.createElement('a');
+  a.href = _shareImgDataUrl;
+  a.download = '职场疯格_'+(_shareCode||'result')+'.png';
+  a.click();
+}
+
+function closeSaveOverlay() {
+  document.getElementById('save-overlay').classList.remove('show');
 }
 
 function copyResult(code, name) {
